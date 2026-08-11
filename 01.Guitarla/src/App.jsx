@@ -7,17 +7,22 @@ function App() {
 
   // Estados para el carrito de compras
   const [data, setData] = useState([]);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cart')) ?? []);
 
   // Simulando la carga de datos desde una API o base de datos
   useEffect(() => {
     setData(db);
   }, []);
 
-  function addToCart(item) {
+  useEffect( () => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
+  function addToCart(item) {
     const itemExists = cart.findIndex(element => element.id === item.id);
     if(itemExists >= 0) {
+      if(cart[itemExists].quantity >= 5) return; 
+
       const updatedCart = [...cart];
       updatedCart[itemExists].quantity ++;
       setCart(updatedCart);
@@ -27,14 +32,53 @@ function App() {
     item.quantity = 1;
     setCart(prevState => [...prevState, item]);
   }
-  
+
+  function removeFromCart(id) {
+    setCart( prevState => prevState.filter( item => item.id !== id))
+  }
+
+  function decreaseQuantity(id) {
+    const updatedCart = cart.map( item => {
+      if(item.id === id && item.quantity > 1) {
+        return {
+          ...item,
+          quantity: item.quantity - 1
+        }
+      }
+      return item;
+    })
+
+    setCart(updatedCart);
+  }
+
+  function increaseQuantity(id) {
+    const updatedCart = cart.map( item => {
+      if(item.id === id && item.quantity < 5) {
+        return {
+          ...item,
+          quantity: item.quantity + 1
+        }
+      }
+      return item;
+    })
+
+    setCart(updatedCart);
+  }
+
+  function clearCart() {
+    setCart([]);
+  }
+
   return (
     <>
       <Header 
         cart={cart}
+        removeFromCart={removeFromCart}
+        increaseQuantity={increaseQuantity}
+        decreaseQuantity={decreaseQuantity}
+        clearCart={clearCart}
       />
       
-
       <main className="container-xl mt-5">
           <h2 className="text-center">Nuestra Colección</h2>
 
