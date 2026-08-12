@@ -1,21 +1,30 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '../data/db';
+import type { Guitar, CartItem } from '../types';
 
 export default function useCart() {
-// Estados para el carrito de compras
-  const [data, setData] = useState([]);
-  const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cart')) ?? []);
+  
+  const initialCart = () : CartItem[] => {
+    const localStorageCart = localStorage.getItem('cart');
+    return localStorageCart 
+      ? JSON.parse(localStorageCart)
+      : [];
+  }
+
+  // Estados para el carrito de compras
+  const [data] = useState(db);
+  const [cart, setCart] = useState(initialCart);
 
   // Simulando la carga de datos desde una API o base de datos
-  useEffect(() => {
-    setData(db);
-  }, []);
+  // useEffect(() => {
+  //   setData(db);
+  // }, []);
 
   useEffect( () => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  function addToCart(item) {
+  function addToCart(item : Guitar) {
     const itemExists = cart.findIndex(element => element.id === item.id);
     if(itemExists >= 0) {
       if(cart[itemExists].quantity >= 5) return; 
@@ -26,15 +35,15 @@ export default function useCart() {
       return;
     }
 
-    item.quantity = 1;
-    setCart(prevState => [...prevState, item]);
+    const newItem : CartItem = { ...item, quantity: 1};
+    setCart(prevState => [...prevState, newItem]);
   }
 
-  function removeFromCart(id) {
+  function removeFromCart(id : Guitar['id']) {
     setCart( prevState => prevState.filter( item => item.id !== id))
   }
 
-  function decreaseQuantity(id) {
+  function decreaseQuantity(id : Guitar['id']) {
     const updatedCart = cart.map( item => {
       if(item.id === id && item.quantity > 1) {
         return {
@@ -48,7 +57,7 @@ export default function useCart() {
     setCart(updatedCart);
   }
 
-  function increaseQuantity(id) {
+  function increaseQuantity(id : Guitar['id']) {
     const updatedCart = cart.map( item => {
       if(item.id === id && item.quantity < 5) {
         return {
