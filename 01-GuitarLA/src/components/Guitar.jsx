@@ -1,12 +1,5 @@
-interface Guitar {
-    id: number;
-    name: string;
-    image: string;
-    description: string;
-    price: number;
-}
 
-export default function Guitar({guitar, addToCart} : {guitar : Guitar, addToCart : (guitar: Guitar) => void}) {
+export default function Guitar({guitar, addToCart}) {
 
     const { id, name, image, description, price } = guitar;
 
